@@ -6,8 +6,8 @@ from sys import argv
 from colorama import init
 
 from helpers.handlers.adb import get_device, get_app
-from helpers.io import dump_app
-from helpers.writer import info, bold, panic
+from helpers.io import dump_app, decode_app
+from helpers.writer import info, bold, panic, success, item
 
 
 def main():
@@ -15,7 +15,8 @@ def main():
 
     info(f'{bold("PPP")} - {bold("P")}roxy {bold("p")}ara {bold("P")}reguiçosos.')
     info(f'Writen by {bold("Jojo <jonas.uliana at passwd.com.br>")}.')
-    info(f'For help, get in touch via {bold("keybase.io/bizarrenull")}.\n')
+    info(f'For help, get in touch via {bold("keybase.io/bizarrenull")}.')
+    info('PS: I \'m not a Python developer.\n')
 
     if len(argv) < 2:
         info(bold('Usage examples: '))
@@ -28,10 +29,27 @@ def main():
     info(f'Using device {bold(device)} as the pwning host.')
     app_name, app_path = get_app(argv[1], device)
     info(f'Analysing app {bold(app_name)}...')
-    path = dump_app(app_path, device)
+    dump_path = dump_app(app_path, device)
     info('Package dumped...')
-    info(f'Analysing {len(os.listdir(path))} file(s)...')
-    rmtree(path, ignore_errors=True)
+
+    for apk in os.listdir(dump_path):
+        apk_path = os.path.join(dump_path, apk)
+        if not os.path.isfile(apk_path):
+            continue
+        matched_signatures = decode_app(apk, dump_path)
+        if len(matched_signatures) > 0:
+            print()
+            for element in matched_signatures:
+                if not element.is_binary:
+                    success(f'{bold(element.signature_name)} (.smali):')
+                    item(f'Detected on {bold(element.file_path)}:{bold(str(element.file_line))}')
+                    item(f'With pattern "{bold(element.pattern)}"')
+                    item(f'Raw value is "{bold(element.line_value.strip())}"')
+                    print()
+                else:
+                    print(element.signature_name)
+
+    rmtree(dump_path, ignore_errors=True)
 
 
 if __name__ == '__main__':

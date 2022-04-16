@@ -22,5 +22,13 @@ def info(text: str):
     print(f'{bold("i", "blue")} {text}')
 
 
+def item(text: str):
+    print(f'  {bold("↦", "green")} {text}')
+
+
 def warn(text: str):
     print(f'{bold("w", "yellow")} {text}')
+
+
+def success(text: str):
+    print(f'{bold("s", "green")} {text}')

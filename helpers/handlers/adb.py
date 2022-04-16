@@ -51,8 +51,8 @@ def get_app(package: str, device: str) -> (str, str, str):
         panic('Unable to find any Android application by given name!')
 
     packages = stdout.split('\n')
-    if len(packages) > 1:
-        panic(f'Multiple packages to current package criteria!')
+    if len(packages) > 1 or not packages[0]:
+        panic(f'Unable to find a unique packages by current criteria!')
 
     tmp = packages[0].split(':')[1]
     k = tmp.rfind('/')
